@@ -8,8 +8,14 @@ import TrainerForm from "@/components/admin/TrainerForm";
 import TrainerList from "@/components/admin/TrainerList";
 import ScheduleForm from "@/components/admin/ScheduleForm";
 import ScheduleList from "@/components/admin/ScheduleList";
+import NewsForm from "@/components/admin/NewsForm";
+import NewsList from "@/components/admin/NewsList";
+import SubscriptionForm from "@/components/admin/SubscriptionForm";
+import SubscriptionList from "@/components/admin/SubscriptionList";
 import { useTrainers, Trainer } from "@/hooks/useTrainers";
 import { useSchedule, ScheduleItem } from "@/hooks/useSchedule";
+import { useNews, News } from "@/hooks/useNews";
+import { useSubscriptions, Subscription } from "@/hooks/useSubscriptions";
 
 const AdminPanel = () => {
   const navigate = useNavigate();
@@ -18,10 +24,19 @@ const AdminPanel = () => {
   const [editingSchedule, setEditingSchedule] = useState<
     ScheduleItem | undefined
   >();
+  const [editingNews, setEditingNews] = useState<News | undefined>();
+  const [editingSub, setEditingSub] = useState<Subscription | undefined>();
 
   const { trainers, addTrainer, updateTrainer, deleteTrainer } = useTrainers();
   const { schedule, addScheduleItem, updateScheduleItem, deleteScheduleItem } =
     useSchedule();
+  const { news, addNews, updateNews, deleteNews } = useNews();
+  const {
+    subscriptions,
+    addSubscription,
+    updateSubscription,
+    deleteSubscription,
+  } = useSubscriptions();
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -56,6 +71,30 @@ const AdminPanel = () => {
     setEditingSchedule(undefined);
   };
 
+  const handleEditNews = (newsItem: News) => {
+    setEditingNews(newsItem);
+  };
+
+  const handleCancelEditNews = () => {
+    setEditingNews(undefined);
+  };
+
+  const handleEditSub = (sub: Subscription) => {
+    setEditingSub(sub);
+  };
+
+  const handleCancelEditSub = () => {
+    setEditingSub(undefined);
+  };
+
+  const handleEditNews = (newsItem: News) => {
+    setEditingNews(newsItem);
+  };
+
+  const handleCancelEditNews = () => {
+    setEditingNews(undefined);
+  };
+
   if (!user) return null;
 
   return (
@@ -73,7 +112,7 @@ const AdminPanel = () => {
         </div>
 
         <Tabs defaultValue="trainers" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="trainers">
               <Icon name="Users" size={18} className="mr-2" />
               Тренеры
@@ -81,6 +120,14 @@ const AdminPanel = () => {
             <TabsTrigger value="schedule">
               <Icon name="Calendar" size={18} className="mr-2" />
               Расписание
+            </TabsTrigger>
+            <TabsTrigger value="news">
+              <Icon name="Newspaper" size={18} className="mr-2" />
+              Новости
+            </TabsTrigger>
+            <TabsTrigger value="subscriptions">
+              <Icon name="CreditCard" size={18} className="mr-2" />
+              Абонементы
             </TabsTrigger>
           </TabsList>
 
@@ -110,6 +157,36 @@ const AdminPanel = () => {
               schedule={schedule}
               onEdit={handleEditSchedule}
               onDelete={deleteScheduleItem}
+            />
+          </TabsContent>
+
+          <TabsContent value="news" className="space-y-6">
+            <NewsForm
+              onSubmit={addNews}
+              onUpdate={updateNews}
+              editingNews={editingNews}
+              onCancelEdit={handleCancelEditNews}
+            />
+            <NewsList
+              news={news}
+              onEdit={handleEditNews}
+              onDelete={deleteNews}
+            />
+          </TabsContent>
+
+          <TabsContent value="subscriptions" className="space-y-6">
+            <SubscriptionForm
+              onSubmit={addSubscription}
+              onUpdate={updateSubscription}
+              editingSub={editingSub}
+              onCancelEdit={handleCancelEditSub}
+            />
+            <SubscriptionList
+              subscriptions={subscriptions}
+              userSubscriptions={userSubscriptions}
+              onEdit={handleEditSub}
+              onDelete={(id) => console.log("Delete subscription", id)}
+              onUpdatePayment={updatePaymentStatus}
             />
           </TabsContent>
         </Tabs>
