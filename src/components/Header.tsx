@@ -26,6 +26,9 @@ const Header = () => {
     { path: "/", label: "Главная", icon: "Home" },
     { path: "/booking", label: "Запись", icon: "Calendar" },
     ...(user ? [{ path: "/profile", label: "Кабинет", icon: "User" }] : []),
+    ...(user && user.role === "admin"
+      ? [{ path: "/admin", label: "Админ панель", icon: "Settings" }]
+      : []),
   ];
 
   return (
