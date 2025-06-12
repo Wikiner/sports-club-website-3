@@ -16,25 +16,20 @@ import { toast } from "sonner";
 
 interface FormData {
   name: string;
-  email: string;
+  username: string;
   password: string;
   role: string;
 }
 
 const AuthForm = () => {
   const navigate = useNavigate();
-  const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const [loginData, setLoginData] = useState({ username: "", password: "" });
   const [registerData, setRegisterData] = useState<FormData>({
     name: "",
-    email: "",
+    username: "",
     password: "",
     role: "",
   });
-
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
 
   const validatePassword = (password: string) => {
     return password.length >= 6;
@@ -43,13 +38,8 @@ const AuthForm = () => {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!loginData.email || !loginData.password) {
+    if (!loginData.username || !loginData.password) {
       toast.error("Заполните все поля");
-      return;
-    }
-
-    if (!validateEmail(loginData.email)) {
-      toast.error("Введите корректный email");
       return;
     }
 
@@ -57,7 +47,7 @@ const AuthForm = () => {
     localStorage.setItem(
       "user",
       JSON.stringify({
-        email: loginData.email,
+        username: loginData.username,
         role: "спортсмен",
         name: "Пользователь",
       }),
@@ -72,16 +62,11 @@ const AuthForm = () => {
 
     if (
       !registerData.name ||
-      !registerData.email ||
+      !registerData.username ||
       !registerData.password ||
       !registerData.role
     ) {
       toast.error("Заполните все поля");
-      return;
-    }
-
-    if (!validateEmail(registerData.email)) {
-      toast.error("Введите корректный email");
       return;
     }
 
@@ -95,7 +80,7 @@ const AuthForm = () => {
       "user",
       JSON.stringify({
         name: registerData.name,
-        email: registerData.email,
+        username: registerData.username,
         role: registerData.role,
       }),
     );
@@ -121,14 +106,14 @@ const AuthForm = () => {
         <TabsContent value="login" className="space-y-4">
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="login-email">Email</Label>
+              <Label htmlFor="login-username">Логин</Label>
               <Input
-                id="login-email"
-                type="email"
-                placeholder="example@mail.com"
-                value={loginData.email}
+                id="login-username"
+                type="text"
+                placeholder="Ваш логин"
+                value={loginData.username}
                 onChange={(e) =>
-                  setLoginData({ ...loginData, email: e.target.value })
+                  setLoginData({ ...loginData, username: e.target.value })
                 }
                 className="w-full"
               />
@@ -175,14 +160,14 @@ const AuthForm = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="register-email">Email</Label>
+              <Label htmlFor="register-username">Логин</Label>
               <Input
-                id="register-email"
-                type="email"
-                placeholder="example@mail.com"
-                value={registerData.email}
+                id="register-username"
+                type="text"
+                placeholder="Придумайте логин"
+                value={registerData.username}
                 onChange={(e) =>
-                  setRegisterData({ ...registerData, email: e.target.value })
+                  setRegisterData({ ...registerData, username: e.target.value })
                 }
                 className="w-full"
               />
