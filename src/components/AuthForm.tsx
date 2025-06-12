@@ -101,7 +101,13 @@ const AuthForm = () => {
     );
 
     toast.success("Аккаунт успешно создан!");
-    setTimeout(() => navigate("/profile"), 1000);
+
+    // Перенаправление в зависимости от роли
+    if (registerData.role === "администратор") {
+      setTimeout(() => navigate("/admin"), 1000);
+    } else {
+      setTimeout(() => navigate("/profile"), 1000);
+    }
   };
 
   return (
