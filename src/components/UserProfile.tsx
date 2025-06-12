@@ -42,7 +42,7 @@ const UserProfile = () => {
     ],
   });
 
-  const [bookings, setBookings] = useState([]);
+  const [bookings, setBookings] = useState<any[]>([]);
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
@@ -64,7 +64,10 @@ const UserProfile = () => {
     // Загружаем записи на тренировки
     const savedBookings = localStorage.getItem("bookings");
     if (savedBookings) {
-      setBookings(JSON.parse(savedBookings));
+      const allBookings = JSON.parse(savedBookings);
+      setBookings(
+        allBookings.filter((booking: any) => booking.status === "active"),
+      );
     }
   }, [navigate]);
 
@@ -80,12 +83,34 @@ const UserProfile = () => {
 
   const handleCancelBooking = (bookingIndex: number) => {
     const canceledBooking = bookings[bookingIndex];
+
+    // Обновляем статус записи в localStorage
+    const savedBookings = localStorage.getItem("bookings");
+    if (savedBookings) {
+      const allBookings = JSON.parse(savedBookings);
+      const updatedBookings = allBookings.map((booking: any) =>
+        booking.id === canceledBooking.id
+          ? { ...booking, status: "cancelled" }
+          : booking,
+      );
+      localStorage.setItem("bookings", JSON.stringify(updatedBookings));
+    }
+
+    // Обновляем локальное состояние
     const updatedBookings = bookings.filter(
       (_, index) => index !== bookingIndex,
     );
     setBookings(updatedBookings);
-    localStorage.setItem("bookings", JSON.stringify(updatedBookings));
     toast.success(`Запись на "${canceledBooking.training}" отменена`);
+  };
+
+  const formatBookingDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("ru-RU", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    });
   };
 
   const getStreakColor = (streak: number) => {
@@ -262,73 +287,88 @@ const UserProfile = () => {
         </TabsContent>
 
         {/* Вкладка записей */}
-        <TabsContent value="bookings">
-          <Card>
-            <CardHeader>
-              <CardTitle>Мои записи на тренировки</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {bookings.length > 0 ? (
-                <div className="space-y-4">
-                  {bookings.map((booking: any, index) => (
-                    <div
-                      key={index}
-                      className="p-4 border rounded-lg flex items-center justify-between hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-lg">
-                          {booking.training}
-                        </h4>
-                        <p className="text-gray-600 mb-1">
-                          📅{" "}
-                          {new Date(booking.date).toLocaleDateString("ru-RU")} в{" "}
-                          {booking.time}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          👨‍💼 Тренер: {booking.trainer || "Не указан"}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Badge
-                          variant={
-                            booking.status === "confirmed"
-                              ? "default"
-                              : "secondary"
-                          }
-                        >
-                          {booking.status === "confirmed"
-                            ? "✅ Подтверждено"
-                            : "⏳ Ожидание"}
-                        </Badge>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleCancelBooking(index)}
-                        >
-                          <Icon name="X" size={16} className="mr-1" />
-                          Отписаться
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
+        <TabsContent value="bookings" className="space-y-6">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">
+                Мои записи на тренировки
+              </h3>
+              <Badge variant="secondary">
+                {bookings.length} активных записей
+              </Badge>
+            </div>
+
+            {bookings.length === 0 ? (
+              <Card className="text-center py-12">
+                <CardContent>
                   <Icon
                     name="Calendar"
                     size={48}
-                    className="text-gray-400 mx-auto mb-4"
+                    className="mx-auto mb-4 text-gray-400"
                   />
-                  <p className="text-gray-500 text-lg mb-2">
-                    У вас пока нет записей на тренировки
+                  <h3 className="text-lg font-semibold text-gray-600 mb-2">
+                    Нет активных записей
+                  </h3>
+                  <p className="text-gray-500 mb-4">
+                    Запишитесь на тренировку через расписание
                   </p>
-                  <p className="text-gray-400 text-sm">
-                    Перейдите в расписание, чтобы записаться
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                  <Button
+                    onClick={() => navigate("/schedule")}
+                    className="bg-primary hover:bg-primary/90"
+                  >
+                    Посмотреть расписание
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {bookings.map((booking, index) => (
+                  <Card
+                    key={booking.id}
+                    className="border-l-4 border-l-primary"
+                  >
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h4 className="text-lg font-semibold">
+                              {booking.training}
+                            </h4>
+                            <Badge variant="outline">{booking.type}</Badge>
+                          </div>
+
+                          <div className="space-y-2 text-sm text-gray-600">
+                            <div className="flex items-center gap-2">
+                              <Icon name="Calendar" size={16} />
+                              <span>{formatBookingDate(booking.date)}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Icon name="Clock" size={16} />
+                              <span>{booking.time}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Icon name="User" size={16} />
+                              <span>Тренер: {booking.trainer}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCancelBooking(index)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Icon name="X" size={16} className="mr-1" />
+                          Отменить
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
         </TabsContent>
 
         {/* Вкладка достижений */}

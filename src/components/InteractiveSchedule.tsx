@@ -6,16 +6,55 @@ import ScheduleLegend from "@/components/schedule/ScheduleLegend";
 import SessionCard from "@/components/schedule/SessionCard";
 import EmptyState from "@/components/schedule/EmptyState";
 import ContactInfo from "@/components/schedule/ContactInfo";
+import { toast } from "sonner";
 
 const InteractiveSchedule = () => {
   const [selectedDate, setSelectedDate] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
 
   const handleBooking = (session: TrainingSession) => {
-    if (session.spots >= session.maxSpots) return;
-    alert(
-      `Запись на "${session.title}" в ${session.time} - функция в разработке`,
+    if (session.spots >= session.maxSpots) {
+      toast.error("На эту тренировку нет свободных мест");
+      return;
+    }
+
+    // Проверяем авторизацию
+    const savedUser = localStorage.getItem("user");
+    if (!savedUser) {
+      toast.error("Войдите в систему для записи на тренировку");
+      return;
+    }
+
+    // Проверяем существующие записи
+    const savedBookings = localStorage.getItem("bookings");
+    const bookings = savedBookings ? JSON.parse(savedBookings) : [];
+
+    const existingBooking = bookings.find(
+      (booking: any) =>
+        booking.sessionId === session.id && booking.status === "active",
     );
+
+    if (existingBooking) {
+      toast.error("Вы уже записаны на эту тренировку");
+      return;
+    }
+
+    // Создаем новую запись
+    const newBooking = {
+      id: Date.now().toString(),
+      sessionId: session.id,
+      training: session.title,
+      trainer: session.trainer,
+      date: session.date,
+      time: session.time,
+      type: session.type,
+      bookingDate: new Date().toISOString(),
+      status: "active",
+    };
+
+    const updatedBookings = [...bookings, newBooking];
+    localStorage.setItem("bookings", JSON.stringify(updatedBookings));
+    toast.success(`Вы записаны на "${session.title}"`);
   };
 
   const formatDate = (dateString: string) => {
