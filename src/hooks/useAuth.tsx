@@ -1,5 +1,10 @@
-
-import { useState, useEffect, createContext, useContext, ReactNode } from "react";
+import {
+  useState,
+  useEffect,
+  createContext,
+  useContext,
+  ReactNode,
+} from "react";
 import { toast } from "sonner";
 
 export interface User {
@@ -37,13 +42,18 @@ export const useAuthHook = () => {
 
   // Демо-пользователи для тестирования
   const demoUsers = [
-    { id: "1", username: "admin", password: "admin123", role: "admin" as const },
+    {
+      id: "1",
+      username: "admin",
+      password: "admin123",
+      role: "admin" as const,
+    },
     { id: "2", username: "user", password: "user123", role: "user" as const },
   ];
 
   const login = (username: string, password: string): boolean => {
     const foundUser = demoUsers.find(
-      (u) => u.username === username && u.password === password
+      (u) => u.username === username && u.password === password,
     );
 
     if (foundUser) {
