@@ -47,14 +47,16 @@ const ScheduleList = ({ schedule, onEdit, onDelete }: ScheduleListProps) => {
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={() => onEdit(item)}>
-                <Icon name="Edit" size={16} />
+                <Icon name="Edit" size={16} className="mr-1" />
+                Редактировать
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => onDelete(item.id)}
               >
-                <Icon name="Trash2" size={16} />
+                <Icon name="Trash2" size={16} className="mr-1" />
+                Удалить
               </Button>
             </div>
           </CardContent>
