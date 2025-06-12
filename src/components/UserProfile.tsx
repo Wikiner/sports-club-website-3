@@ -78,6 +78,16 @@ const UserProfile = () => {
     setUserData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleCancelBooking = (bookingIndex: number) => {
+    const canceledBooking = bookings[bookingIndex];
+    const updatedBookings = bookings.filter(
+      (_, index) => index !== bookingIndex,
+    );
+    setBookings(updatedBookings);
+    localStorage.setItem("bookings", JSON.stringify(updatedBookings));
+    toast.success(`Запись на "${canceledBooking.training}" отменена`);
+  };
+
   const getStreakColor = (streak: number) => {
     if (streak >= 7) return "text-green-600";
     if (streak >= 3) return "text-yellow-600";
@@ -263,32 +273,59 @@ const UserProfile = () => {
                   {bookings.map((booking: any, index) => (
                     <div
                       key={index}
-                      className="p-4 border rounded-lg flex items-center justify-between"
+                      className="p-4 border rounded-lg flex items-center justify-between hover:shadow-md transition-shadow"
                     >
-                      <div>
-                        <h4 className="font-semibold">{booking.training}</h4>
-                        <p className="text-gray-600">
-                          {new Date(booking.date).toLocaleDateString("ru-RU")}
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-lg">
+                          {booking.training}
+                        </h4>
+                        <p className="text-gray-600 mb-1">
+                          📅{" "}
+                          {new Date(booking.date).toLocaleDateString("ru-RU")} в{" "}
+                          {booking.time}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          👨‍💼 Тренер: {booking.trainer || "Не указан"}
                         </p>
                       </div>
-                      <Badge
-                        variant={
-                          booking.status === "confirmed"
-                            ? "default"
-                            : "secondary"
-                        }
-                      >
-                        {booking.status === "confirmed"
-                          ? "Подтверждено"
-                          : "Ожидание"}
-                      </Badge>
+                      <div className="flex items-center gap-3">
+                        <Badge
+                          variant={
+                            booking.status === "confirmed"
+                              ? "default"
+                              : "secondary"
+                          }
+                        >
+                          {booking.status === "confirmed"
+                            ? "✅ Подтверждено"
+                            : "⏳ Ожидание"}
+                        </Badge>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleCancelBooking(index)}
+                        >
+                          <Icon name="X" size={16} className="mr-1" />
+                          Отписаться
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-center text-gray-500 py-8">
-                  У вас пока нет записей на тренировки
-                </p>
+                <div className="text-center py-12">
+                  <Icon
+                    name="Calendar"
+                    size={48}
+                    className="text-gray-400 mx-auto mb-4"
+                  />
+                  <p className="text-gray-500 text-lg mb-2">
+                    У вас пока нет записей на тренировки
+                  </p>
+                  <p className="text-gray-400 text-sm">
+                    Перейдите в расписание, чтобы записаться
+                  </p>
+                </div>
               )}
             </CardContent>
           </Card>
