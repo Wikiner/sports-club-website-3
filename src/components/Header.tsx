@@ -35,6 +35,12 @@ const Header = () => {
                 <span className="font-medium">{item.label}</span>
               </Link>
             ))}
+            <Link to="/auth">
+              <Button className="bg-primary hover:bg-primary/90">
+                <Icon name="LogIn" size={18} className="mr-2" />
+                Вход/Регистрация
+              </Button>
+            </Link>
           </nav>
 
           <div className="md:hidden">
