@@ -10,6 +10,12 @@ export interface Subscription {
   isActive: boolean;
 }
 
+export interface PurchaseState {
+  isLoading: boolean;
+  isSuccess: boolean;
+  subscriptionId: string | null;
+}
+
 export const useSubscriptions = () => {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([
     {
@@ -133,10 +139,49 @@ export const useSubscriptions = () => {
     toast.success("Абонемент удален");
   };
 
+  const [purchaseState, setPurchaseState] = useState<PurchaseState>({
+    isLoading: false,
+    isSuccess: false,
+    subscriptionId: null,
+  });
+
+  const purchaseSubscription = async (
+    subscriptionId: string,
+    subscriptionName: string,
+  ) => {
+    setPurchaseState({
+      isLoading: true,
+      isSuccess: false,
+      subscriptionId,
+    });
+
+    // Симуляция покупки
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    setPurchaseState({
+      isLoading: false,
+      isSuccess: true,
+      subscriptionId,
+    });
+
+    toast.success(`🎉 Абонемент "${subscriptionName}" успешно приобретен!`);
+
+    // Сброс состояния через 3 секунды
+    setTimeout(() => {
+      setPurchaseState({
+        isLoading: false,
+        isSuccess: false,
+        subscriptionId: null,
+      });
+    }, 3000);
+  };
+
   return {
     subscriptions,
     addSubscription,
     updateSubscription,
     deleteSubscription,
+    purchaseState,
+    purchaseSubscription,
   };
 };

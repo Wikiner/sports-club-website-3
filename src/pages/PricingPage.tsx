@@ -5,13 +5,18 @@ import { Badge } from "@/components/ui/badge";
 import Icon from "@/components/ui/icon";
 import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { Link } from "react-router-dom";
+import PurchaseButton from "@/components/PurchaseButton";
 
 const PricingPage = () => {
-  const { subscriptions } = useSubscriptions();
+  const { subscriptions, purchaseState, purchaseSubscription } =
+    useSubscriptions();
   const activeSubscriptions = subscriptions.filter((sub) => sub.isActive);
 
-  const handleSubscribe = (subscriptionName: string) => {
-    alert(`Запись на абонемент "${subscriptionName}" - функция в разработке`);
+  const handleSubscribe = (
+    subscriptionId: string,
+    subscriptionName: string,
+  ) => {
+    purchaseSubscription(subscriptionId, subscriptionName);
   };
 
   return (
@@ -57,7 +62,21 @@ const PricingPage = () => {
               {activeSubscriptions.map((subscription) => (
                 <Card
                   key={subscription.id}
-                  className="hover:shadow-2xl transition-all duration-300 relative overflow-hidden"
+                  className={`
+                    hover:shadow-2xl transition-all duration-300 relative overflow-hidden
+                    ${
+                      purchaseState.subscriptionId === subscription.id &&
+                      purchaseState.isSuccess
+                        ? "ring-4 ring-green-400 shadow-green-200 animate-pulse"
+                        : ""
+                    }
+                    ${
+                      purchaseState.subscriptionId === subscription.id &&
+                      purchaseState.isLoading
+                        ? "scale-105 shadow-xl"
+                        : ""
+                    }
+                  `}
                 >
                   {subscription.name.toLowerCase().includes("популярный") && (
                     <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
@@ -100,12 +119,12 @@ const PricingPage = () => {
                       ))}
                     </ul>
 
-                    <Button
-                      className="w-full py-3 text-lg font-semibold"
-                      onClick={() => handleSubscribe(subscription.name)}
-                    >
-                      Выбрать абонемент
-                    </Button>
+                    <PurchaseButton
+                      subscriptionId={subscription.id}
+                      subscriptionName={subscription.name}
+                      purchaseState={purchaseState}
+                      onPurchase={handleSubscribe}
+                    />
                   </CardContent>
                 </Card>
               ))}
