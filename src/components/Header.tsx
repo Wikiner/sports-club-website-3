@@ -1,14 +1,26 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Icon from "@/components/ui/icon";
-import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import LoginDialog from "@/components/LoginDialog";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 const Header = () => {
   const location = useLocation();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, logout, isAdmin } = useAuth();
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    // Проверяем авторизацию при загрузке
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    setUser(null);
+    toast.success("Вы вышли из аккаунта");
+  };
 
   const navItems = [
     { path: "/", label: "Главная", icon: "Home" },
@@ -17,7 +29,7 @@ const Header = () => {
     { path: "/trainers", label: "Тренеры", icon: "Users" },
     { path: "/contact", label: "Поддержка", icon: "MessageCircle" },
     ...(user ? [{ path: "/profile", label: "Кабинет", icon: "User" }] : []),
-    ...(isAdmin
+    ...(user && user.role === "admin"
       ? [{ path: "/admin", label: "Админ панель", icon: "Settings" }]
       : []),
   ];
@@ -46,35 +58,30 @@ const Header = () => {
                 <span className="font-medium">{item.label}</span>
               </Link>
             ))}
-          </nav>
 
-          <div className="flex items-center space-x-4">
             {user ? (
               <div className="flex items-center space-x-3">
                 <span className="text-sm text-gray-600">
-                  {user.username} {isAdmin && "(Админ)"}
+                  Привет, <span className="font-medium">{user.name}</span>
                 </span>
-                <Button variant="outline" size="sm" onClick={logout}>
+                <Button variant="outline" size="sm" onClick={handleLogout}>
                   <Icon name="LogOut" size={16} className="mr-2" />
-                  Выйти
+                  Выход
                 </Button>
               </div>
             ) : (
-              <LoginDialog>
-                <Button variant="outline" size="sm">
-                  <Icon name="User" size={16} className="mr-2" />
-                  Войти
+              <Link to="/auth">
+                <Button className="bg-primary hover:bg-primary/90">
+                  <Icon name="LogIn" size={18} className="mr-2" />
+                  Вход/Регистрация
                 </Button>
-              </LoginDialog>
+              </Link>
             )}
+          </nav>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              className="md:hidden"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              <Icon name={isMenuOpen ? "X" : "Menu"} size={20} />
+          <div className="md:hidden">
+            <Button variant="ghost" size="icon">
+              <Icon name="Menu" size={24} />
             </Button>
           </div>
         </div>
