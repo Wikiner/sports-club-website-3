@@ -16,7 +16,7 @@ const ProfilePage = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gray-50 py-12">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50 py-12">
         <div className="container mx-auto px-4">
           <UserProfile />
         </div>
