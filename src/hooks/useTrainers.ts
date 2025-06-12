@@ -98,7 +98,20 @@ export const useTrainers = () => {
         email: "sergey@fitclub.ru",
       },
     },
-
+    {
+      id: 7,
+      name: "Мария Белова",
+      specialization: "Групповые программы",
+      experience: "9 лет",
+      photo:
+        "https://images.unsplash.com/photo-1594736797933-d0d6e30d6b80?w=400&h=400&fit=crop&crop=face",
+      description: "Ведущий инструктор групповых занятий",
+      certifications: ["AFAA", "Les Mills BodyPump"],
+      contactInfo: {
+        phone: "+7 (999) 789-01-23",
+        email: "maria@fitclub.ru",
+      },
+    },
     {
       id: 8,
       name: "Андрей Козлов",
