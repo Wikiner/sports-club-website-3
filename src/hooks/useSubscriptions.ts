@@ -5,85 +5,138 @@ export interface Subscription {
   id: string;
   name: string;
   price: number;
-  duration: number;
+  duration: number; // в днях
   features: string[];
   isActive: boolean;
 }
 
-export interface UserSubscription {
-  id: string;
-  userId: string;
-  userName: string;
-  subscriptionId: string;
-  subscriptionName: string;
-  startDate: string;
-  endDate: string;
-  status: "paid" | "unpaid" | "expired";
-  price: number;
-}
-
 export const useSubscriptions = () => {
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-  const [userSubscriptions, setUserSubscriptions] = useState<
-    UserSubscription[]
-  >([]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([
+    {
+      id: "1",
+      name: "Базовый",
+      price: 2990,
+      duration: 30,
+      features: [
+        "Доступ в тренажерный зал",
+        "Раздевалки и душевые",
+        "Парковка",
+        "Wi-Fi",
+      ],
+      isActive: true,
+    },
+    {
+      id: "2",
+      name: "Популярный",
+      price: 4990,
+      duration: 30,
+      features: [
+        "Доступ в тренажерный зал",
+        "Групповые тренировки",
+        "Бассейн",
+        "Сауна и хамам",
+        "Раздевалки и душевые",
+        "Парковка",
+        "Wi-Fi",
+      ],
+      isActive: true,
+    },
+    {
+      id: "3",
+      name: "Премиум",
+      price: 7990,
+      duration: 30,
+      features: [
+        "Полный доступ ко всем зонам",
+        "Групповые тренировки",
+        "Персональные консультации",
+        "Бассейн и аквааэробика",
+        "Сауна, хамам, джакузи",
+        "Массажный кабинет",
+        "Солярий",
+        "Раздевалки VIP",
+        "Парковка",
+        "Wi-Fi",
+      ],
+      isActive: true,
+    },
+    {
+      id: "4",
+      name: "Студенческий",
+      price: 1990,
+      duration: 30,
+      features: [
+        "Доступ в тренажерный зал",
+        "Групповые тренировки (до 14:00)",
+        "Раздевалки и душевые",
+        "Wi-Fi",
+      ],
+      isActive: true,
+    },
+    {
+      id: "5",
+      name: "Годовой Премиум",
+      price: 79990,
+      duration: 365,
+      features: [
+        "Полный доступ ко всем зонам",
+        "Безлимитные групповые тренировки",
+        "4 персональные тренировки в месяц",
+        "Бассейн и аквааэробика",
+        "Все SPA услуги",
+        "Консультации диетолога",
+        "Заморозка до 30 дней",
+        "Приоритетная запись",
+        "VIP раздевалки",
+        "Гостевые визиты",
+      ],
+      isActive: true,
+    },
+  ]);
 
   useEffect(() => {
-    const savedSubs = localStorage.getItem("subscriptions");
-    if (savedSubs) {
-      setSubscriptions(JSON.parse(savedSubs));
-    }
-
-    const savedUserSubs = localStorage.getItem("userSubscriptions");
-    if (savedUserSubs) {
-      setUserSubscriptions(JSON.parse(savedUserSubs));
+    const savedSubscriptions = localStorage.getItem("subscriptions");
+    if (savedSubscriptions) {
+      setSubscriptions(JSON.parse(savedSubscriptions));
     }
   }, []);
 
-  const saveSubscriptions = (data: Subscription[]) => {
-    localStorage.setItem("subscriptions", JSON.stringify(data));
-    setSubscriptions(data);
+  const saveSubscriptions = (subscriptionsData: Subscription[]) => {
+    localStorage.setItem("subscriptions", JSON.stringify(subscriptionsData));
+    setSubscriptions(subscriptionsData);
   };
 
-  const saveUserSubscriptions = (data: UserSubscription[]) => {
-    localStorage.setItem("userSubscriptions", JSON.stringify(data));
-    setUserSubscriptions(data);
-  };
-
-  const addSubscription = (sub: Omit<Subscription, "id">) => {
-    const newSub: Subscription = {
-      ...sub,
+  const addSubscription = (subscription: Omit<Subscription, "id">) => {
+    const newSubscription: Subscription = {
+      ...subscription,
       id: Date.now().toString(),
     };
-    const updated = [...subscriptions, newSub];
-    saveSubscriptions(updated);
+    const updatedSubscriptions = [...subscriptions, newSubscription];
+    saveSubscriptions(updatedSubscriptions);
     toast.success("Абонемент добавлен");
   };
 
-  const updateSubscription = (id: string, sub: Omit<Subscription, "id">) => {
-    const updated = subscriptions.map((item) =>
-      item.id === id ? { ...sub, id } : item,
+  const updateSubscription = (
+    id: string,
+    subscription: Omit<Subscription, "id">,
+  ) => {
+    const updatedSubscriptions = subscriptions.map((item) =>
+      item.id === id ? { ...subscription, id } : item,
     );
-    saveSubscriptions(updated);
+    saveSubscriptions(updatedSubscriptions);
     toast.success("Абонемент обновлен");
   };
 
-  const updatePaymentStatus = (
-    id: string,
-    status: UserSubscription["status"],
-  ) => {
-    const updated = userSubscriptions.map((item) =>
-      item.id === id ? { ...item, status } : item,
-    );
-    saveUserSubscriptions(updated);
-    toast.success("Статус оплаты обновлен");
+  const deleteSubscription = (id: string) => {
+    const updatedSubscriptions = subscriptions.filter((item) => item.id !== id);
+    saveSubscriptions(updatedSubscriptions);
+    toast.success("Абонемент удален");
   };
 
   return {
     subscriptions,
-    userSubscriptions,
     addSubscription,
     updateSubscription,
-    updatePaymentStatus,
+    deleteSubscription,
   };
 };
