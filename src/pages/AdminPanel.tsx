@@ -87,14 +87,6 @@ const AdminPanel = () => {
     setEditingSub(undefined);
   };
 
-  const handleEditNews = (newsItem: News) => {
-    setEditingNews(newsItem);
-  };
-
-  const handleCancelEditNews = () => {
-    setEditingNews(undefined);
-  };
-
   if (!user) return null;
 
   return (
@@ -183,10 +175,8 @@ const AdminPanel = () => {
             />
             <SubscriptionList
               subscriptions={subscriptions}
-              userSubscriptions={userSubscriptions}
               onEdit={handleEditSub}
-              onDelete={(id) => console.log("Delete subscription", id)}
-              onUpdatePayment={updatePaymentStatus}
+              onDelete={deleteSubscription}
             />
           </TabsContent>
         </Tabs>
