@@ -53,7 +53,7 @@ const LoginDialog = ({ children }: LoginDialogProps) => {
           </p>
           <div className="text-xs text-blue-700 space-y-1">
             <div>
-              <strong>Админ:</strong> admin / admin123
+              <strong>Админ:</strong> admin / admin123 👑
             </div>
             <div>
               <strong>Пользователь:</strong> user / user123
