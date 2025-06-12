@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import NewsSection from "@/components/NewsSection";
+import InteractiveSchedule from "@/components/InteractiveSchedule";
 import { Card, CardContent } from "@/components/ui/card";
 import Icon from "@/components/ui/icon";
 
@@ -144,6 +145,8 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      <InteractiveSchedule />
 
       {/* Контакты */}
       <section className="py-16 bg-gray-900 text-white">
