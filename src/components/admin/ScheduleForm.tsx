@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,8 +17,8 @@ import { toast } from "sonner";
 
 interface ScheduleFormProps {
   trainers: Trainer[];
-  onSubmit: (item: Omit<ScheduleItem, "id">) => void;
-  onUpdate: (id: string, item: Omit<ScheduleItem, "id">) => void;
+  onSubmit: (schedule: Omit<ScheduleItem, "id">) => void;
+  onUpdate: (id: string, schedule: Partial<ScheduleItem>) => void;
   editingItem?: ScheduleItem;
   onCancelEdit: () => void;
 }
@@ -30,150 +30,180 @@ const ScheduleForm = ({
   editingItem,
   onCancelEdit,
 }: ScheduleFormProps) => {
-  const [form, setForm] = useState({
-    time: editingItem?.time || "",
-    title: editingItem?.title || "",
-    trainer: editingItem?.trainer || "",
-    duration: editingItem?.duration || "",
-    difficulty: editingItem?.difficulty || "Средне",
-    spots: editingItem?.spots || 10,
+  const [formData, setFormData] = useState({
+    time: "",
+    title: "",
+    trainer: "",
+    duration: "",
+    difficulty: "Легко",
+    spots: 10,
   });
 
-  const handleSubmit = () => {
-    if (!form.time || !form.title || !form.trainer || !form.duration) {
-      toast.error("Заполните все обязательные поля");
-      return;
+  useEffect(() => {
+    if (editingItem) {
+      setFormData({
+        time: editingItem.time,
+        title: editingItem.title,
+        trainer: editingItem.trainer,
+        duration: editingItem.duration,
+        difficulty: editingItem.difficulty,
+        spots: editingItem.spots,
+      });
+    } else {
+      setFormData({
+        time: "",
+        title: "",
+        trainer: "",
+        duration: "",
+        difficulty: "Легко",
+        spots: 10,
+      });
     }
+  }, [editingItem]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
 
     if (editingItem) {
-      onUpdate(editingItem.id, form);
+      onUpdate(editingItem.id, formData);
+      toast.success("Занятие успешно обновлено!");
+      onCancelEdit();
     } else {
-      onSubmit(form);
+      onSubmit(formData);
+      toast.success("Занятие успешно добавлено!");
     }
 
-    setForm({
+    setFormData({
       time: "",
       title: "",
       trainer: "",
       duration: "",
-      difficulty: "Средне",
+      difficulty: "Легко",
       spots: 10,
     });
-  };
-
-  const handleCancel = () => {
-    setForm({
-      time: "",
-      title: "",
-      trainer: "",
-      duration: "",
-      difficulty: "Средне",
-      spots: 10,
-    });
-    onCancelEdit();
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Icon name={editingItem ? "Edit" : "Plus"} size={20} />
           {editingItem ? "Редактировать занятие" : "Добавить занятие"}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <Label htmlFor="time">Время *</Label>
-            <Input
-              id="time"
-              value={form.time}
-              onChange={(e) => setForm({ ...form, time: e.target.value })}
-              placeholder="07:00"
-            />
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="time">Время</Label>
+              <Input
+                id="time"
+                type="time"
+                value={formData.time}
+                onChange={(e) =>
+                  setFormData({ ...formData, time: e.target.value })
+                }
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="title">Название</Label>
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="trainer">Тренер</Label>
+              <Select
+                value={formData.trainer}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, trainer: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите тренера" />
+                </SelectTrigger>
+                <SelectContent>
+                  {trainers.map((trainer) => (
+                    <SelectItem key={trainer.id} value={trainer.name}>
+                      {trainer.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="duration">Длительность</Label>
+              <Input
+                id="duration"
+                value={formData.duration}
+                onChange={(e) =>
+                  setFormData({ ...formData, duration: e.target.value })
+                }
+                placeholder="60 минут"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="difficulty">Сложность</Label>
+              <Select
+                value={formData.difficulty}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, difficulty: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Легко">Легко</SelectItem>
+                  <SelectItem value="Средне">Средне</SelectItem>
+                  <SelectItem value="Сложно">Сложно</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="spots">Количество мест</Label>
+              <Input
+                id="spots"
+                type="number"
+                min="1"
+                value={formData.spots}
+                onChange={(e) =>
+                  setFormData({ ...formData, spots: parseInt(e.target.value) })
+                }
+                required
+              />
+            </div>
           </div>
-          <div>
-            <Label htmlFor="title">Название занятия *</Label>
-            <Input
-              id="title"
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              placeholder="Утренняя йога"
-            />
-          </div>
-          <div>
-            <Label htmlFor="trainer">Тренер *</Label>
-            <Select
-              value={form.trainer}
-              onValueChange={(value) => setForm({ ...form, trainer: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Выберите тренера" />
-              </SelectTrigger>
-              <SelectContent>
-                {trainers.map((trainer) => (
-                  <SelectItem key={trainer.id} value={trainer.name}>
-                    {trainer.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label htmlFor="duration">Длительность *</Label>
-            <Input
-              id="duration"
-              value={form.duration}
-              onChange={(e) => setForm({ ...form, duration: e.target.value })}
-              placeholder="60 мин"
-            />
-          </div>
-          <div>
-            <Label htmlFor="difficulty">Сложность</Label>
-            <Select
-              value={form.difficulty}
-              onValueChange={(value) => setForm({ ...form, difficulty: value })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Легко">Легко</SelectItem>
-                <SelectItem value="Средне">Средне</SelectItem>
-                <SelectItem value="Сложно">Сложно</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label htmlFor="spots">Количество мест</Label>
-            <Input
-              id="spots"
-              type="number"
-              value={form.spots}
-              onChange={(e) =>
-                setForm({ ...form, spots: parseInt(e.target.value) || 0 })
-              }
-              placeholder="10"
-            />
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            onClick={handleSubmit}
-            className="bg-primary hover:bg-primary/90"
-          >
-            <Icon
-              name={editingItem ? "Save" : "Plus"}
-              size={16}
-              className="mr-2"
-            />
-            {editingItem ? "Сохранить" : "Добавить занятие"}
-          </Button>
-          {editingItem && (
-            <Button variant="outline" onClick={handleCancel}>
-              Отмена
+
+          <div className="flex gap-2">
+            <Button type="submit">
+              <Icon
+                name={editingItem ? "Save" : "Plus"}
+                size={16}
+                className="mr-2"
+              />
+              {editingItem ? "Сохранить" : "Добавить"}
             </Button>
-          )}
-        </div>
+            {editingItem && (
+              <Button type="button" variant="outline" onClick={onCancelEdit}>
+                <Icon name="X" size={16} className="mr-2" />
+                Отмена
+              </Button>
+            )}
+          </div>
+        </form>
       </CardContent>
     </Card>
   );

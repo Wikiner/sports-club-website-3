@@ -39,7 +39,7 @@ const AdminPanel = () => {
   } = useSubscriptions();
 
   useEffect(() => {
-    const userData = localStorage.getItem("user");
+    const userData = localStorage.getItem("currentUser");
     if (!userData) {
       navigate("/auth");
       return;
