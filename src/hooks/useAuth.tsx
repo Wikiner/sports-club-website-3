@@ -56,19 +56,15 @@ export const useAuthHook = () => {
   ];
 
   const login = (username: string, password: string): boolean => {
-    const user = demoUsers.find(
+    const foundUser = demoUsers.find(
       (u) => u.username === username && u.password === password,
     );
 
-    if (user) {
-      const authUser = {
-        id: user.id,
-        username: user.username,
-        role: user.role,
-      };
-      setUser(authUser);
-      localStorage.setItem("currentUser", JSON.stringify(authUser));
-      toast.success(`Добро пожаловать, ${user.username}!`);
+    if (foundUser) {
+      const { password: _, ...userWithoutPassword } = foundUser;
+      setUser(userWithoutPassword);
+      localStorage.setItem("currentUser", JSON.stringify(userWithoutPassword));
+      toast.success(`Добро пожаловать, ${foundUser.username}!`);
       return true;
     } else {
       toast.error("Неверный логин или пароль");
@@ -79,14 +75,16 @@ export const useAuthHook = () => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem("currentUser");
-    toast.info("Вы вышли из системы");
+    toast.success("Вы вышли из системы");
   };
+
+  const isAdmin = user?.role === "admin";
 
   return {
     user,
     login,
     logout,
-    isAdmin: user?.role === "admin",
+    isAdmin,
   };
 };
 
@@ -96,5 +94,6 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const auth = useAuthHook();
+
   return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
 };
