@@ -25,7 +25,10 @@ const LoginDialog = ({ children }: LoginDialogProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const success = login(username, password);
+    if (!username.trim() || !password.trim()) {
+      return;
+    }
+    const success = login(username.trim(), password);
     if (success) {
       setOpen(false);
       setUsername("");

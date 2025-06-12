@@ -40,7 +40,6 @@ export const useAuthHook = () => {
     }
   }, []);
 
-  // Демо-пользователи для тестирования
   const demoUsers = [
     {
       id: "1",
@@ -48,39 +47,47 @@ export const useAuthHook = () => {
       password: "admin123",
       role: "admin" as const,
     },
-    { id: "2", username: "user", password: "user123", role: "user" as const },
+    {
+      id: "2",
+      username: "user",
+      password: "user123",
+      role: "user" as const,
+    },
   ];
 
   const login = (username: string, password: string): boolean => {
-    const foundUser = demoUsers.find(
+    const user = demoUsers.find(
       (u) => u.username === username && u.password === password,
     );
 
-    if (foundUser) {
-      const userData: User = {
-        id: foundUser.id,
-        username: foundUser.username,
-        role: foundUser.role,
+    if (user) {
+      const authUser = {
+        id: user.id,
+        username: user.username,
+        role: user.role,
       };
-      setUser(userData);
-      localStorage.setItem("currentUser", JSON.stringify(userData));
-      toast.success(`Добро пожаловать, ${userData.username}!`);
+      setUser(authUser);
+      localStorage.setItem("currentUser", JSON.stringify(authUser));
+      toast.success(`Добро пожаловать, ${user.username}!`);
       return true;
+    } else {
+      toast.error("Неверный логин или пароль");
+      return false;
     }
-
-    toast.error("Неверный логин или пароль");
-    return false;
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem("currentUser");
-    toast.success("Вы вышли из системы");
+    toast.info("Вы вышли из системы");
   };
 
-  const isAdmin = user?.role === "admin";
-
-  return { user, login, logout, isAdmin };
+  return {
+    user,
+    login,
+    logout,
+    isAdmin: user?.role === "admin",
+  };
 };
 
 interface AuthProviderProps {
