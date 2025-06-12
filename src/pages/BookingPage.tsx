@@ -1,5 +1,5 @@
 import Header from "@/components/Header";
-import BookingForm from "@/components/BookingForm";
+import InteractiveSchedule from "@/components/InteractiveSchedule";
 
 const BookingPage = () => {
   return (
@@ -16,7 +16,7 @@ const BookingPage = () => {
               ваших целей!
             </p>
           </div>
-          <BookingForm />
+          <InteractiveSchedule />
         </div>
       </div>
     </>
