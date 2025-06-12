@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ interface UserData {
 }
 
 const UserProfile = () => {
+  const navigate = useNavigate();
   const [userData, setUserData] = useState<UserData>({
     name: "Иван Петров",
     email: "ivan@example.com",
@@ -44,18 +46,27 @@ const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    // Загружаем данные пользователя из localStorage
-    const savedUser = localStorage.getItem("userData");
-    if (savedUser) {
-      setUserData(JSON.parse(savedUser));
+    // Проверяем авторизацию
+    const savedUser = localStorage.getItem("user");
+    if (!savedUser) {
+      navigate("/auth");
+      return;
     }
+
+    const user = JSON.parse(savedUser);
+    // Обновляем данные профиля реальными данными пользователя
+    setUserData((prev) => ({
+      ...prev,
+      name: user.name,
+      email: user.email,
+    }));
 
     // Загружаем записи на тренировки
     const savedBookings = localStorage.getItem("bookings");
     if (savedBookings) {
       setBookings(JSON.parse(savedBookings));
     }
-  }, []);
+  }, [navigate]);
 
   const handleSaveProfile = () => {
     localStorage.setItem("userData", JSON.stringify(userData));

@@ -1,7 +1,18 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import UserProfile from "@/components/UserProfile";
 
 const ProfilePage = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Дополнительная проверка авторизации на уровне страницы
+    const user = localStorage.getItem("user");
+    if (!user) {
+      navigate("/auth");
+    }
+  }, [navigate]);
   return (
     <>
       <Header />

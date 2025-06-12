@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +22,7 @@ interface FormData {
 }
 
 const AuthForm = () => {
+  const navigate = useNavigate();
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [registerData, setRegisterData] = useState<FormData>({
     name: "",
@@ -62,6 +64,7 @@ const AuthForm = () => {
     );
 
     toast.success("Добро пожаловать!");
+    setTimeout(() => navigate("/profile"), 1000);
   };
 
   const handleRegister = (e: React.FormEvent) => {
@@ -98,6 +101,7 @@ const AuthForm = () => {
     );
 
     toast.success("Аккаунт успешно создан!");
+    setTimeout(() => navigate("/profile"), 1000);
   };
 
   return (

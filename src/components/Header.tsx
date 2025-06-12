@@ -1,14 +1,31 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Icon from "@/components/ui/icon";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 const Header = () => {
   const location = useLocation();
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    // Проверяем авторизацию при загрузке
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    setUser(null);
+    toast.success("Вы вышли из аккаунта");
+  };
 
   const navItems = [
     { path: "/", label: "Главная", icon: "Home" },
     { path: "/booking", label: "Запись", icon: "Calendar" },
-    { path: "/profile", label: "Кабинет", icon: "User" },
+    ...(user ? [{ path: "/profile", label: "Кабинет", icon: "User" }] : []),
   ];
 
   return (
@@ -35,12 +52,25 @@ const Header = () => {
                 <span className="font-medium">{item.label}</span>
               </Link>
             ))}
-            <Link to="/auth">
-              <Button className="bg-primary hover:bg-primary/90">
-                <Icon name="LogIn" size={18} className="mr-2" />
-                Вход/Регистрация
-              </Button>
-            </Link>
+
+            {user ? (
+              <div className="flex items-center space-x-3">
+                <span className="text-sm text-gray-600">
+                  Привет, <span className="font-medium">{user.name}</span>
+                </span>
+                <Button variant="outline" size="sm" onClick={handleLogout}>
+                  <Icon name="LogOut" size={16} className="mr-2" />
+                  Выход
+                </Button>
+              </div>
+            ) : (
+              <Link to="/auth">
+                <Button className="bg-primary hover:bg-primary/90">
+                  <Icon name="LogIn" size={18} className="mr-2" />
+                  Вход/Регистрация
+                </Button>
+              </Link>
+            )}
           </nav>
 
           <div className="md:hidden">
