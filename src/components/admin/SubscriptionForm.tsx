@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,11 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import Icon from "@/components/ui/icon";
 import { Subscription } from "@/hooks/useSubscriptions";
-import { toast } from "sonner";
 
 interface SubscriptionFormProps {
-  onSubmit: (subscription: Omit<Subscription, "id">) => void;
-  onUpdate: (id: string, subscription: Partial<Subscription>) => void;
+  onSubmit: (sub: Omit<Subscription, "id">) => void;
+  onUpdate: (id: string, sub: Omit<Subscription, "id">) => void;
   editingSub?: Subscription;
   onCancelEdit: () => void;
 }
@@ -22,59 +21,32 @@ const SubscriptionForm = ({
   editingSub,
   onCancelEdit,
 }: SubscriptionFormProps) => {
-  const [formData, setFormData] = useState({
-    name: "",
-    price: 0,
-    duration: "",
-    description: "",
-    features: "",
-    isActive: true,
+  const [form, setForm] = useState({
+    name: editingSub?.name || "",
+    price: editingSub?.price || 0,
+    duration: editingSub?.duration || 30,
+    features: editingSub?.features.join("\n") || "",
+    isActive: editingSub?.isActive ?? true,
   });
 
-  useEffect(() => {
-    if (editingSub) {
-      setFormData({
-        name: editingSub.name,
-        price: editingSub.price,
-        duration: editingSub.duration,
-        description: editingSub.description,
-        features: editingSub.features.join(", "),
-        isActive: editingSub.isActive,
-      });
-    } else {
-      setFormData({
-        name: "",
-        price: 0,
-        duration: "",
-        description: "",
-        features: "",
-        isActive: true,
-      });
-    }
-  }, [editingSub]);
+  const handleSubmit = () => {
+    if (!form.name || form.price <= 0) return;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const subscriptionData = {
-      ...formData,
-      features: formData.features.split(",").map((f) => f.trim()),
+    const subData = {
+      ...form,
+      features: form.features.split("\n").filter((f) => f.trim()),
     };
 
     if (editingSub) {
-      onUpdate(editingSub.id, subscriptionData);
-      toast.success("Абонемент успешно обновлён!");
-      onCancelEdit();
+      onUpdate(editingSub.id, subData);
     } else {
-      onSubmit(subscriptionData);
-      toast.success("Абонемент успешно добавлен!");
+      onSubmit(subData);
     }
 
-    setFormData({
+    setForm({
       name: "",
       price: 0,
-      duration: "",
-      description: "",
+      duration: 30,
       features: "",
       isActive: true,
     });
@@ -84,108 +56,80 @@ const SubscriptionForm = ({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Icon name={editingSub ? "Edit" : "Plus"} size={20} />
+          <Icon name="CreditCard" size={20} />
           {editingSub ? "Редактировать абонемент" : "Добавить абонемент"}
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Название</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                required
-                placeholder="Базовый абонемент"
-              />
-            </div>
+      <CardContent className="space-y-4">
+        <div>
+          <Label htmlFor="name">Название абонемента</Label>
+          <Input
+            id="name"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            placeholder="Месячный абонемент"
+          />
+        </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="price">Цена (₽)</Label>
-              <Input
-                id="price"
-                type="number"
-                min="0"
-                value={formData.price}
-                onChange={(e) =>
-                  setFormData({ ...formData, price: Number(e.target.value) })
-                }
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="duration">Длительность</Label>
-              <Input
-                id="duration"
-                value={formData.duration}
-                onChange={(e) =>
-                  setFormData({ ...formData, duration: e.target.value })
-                }
-                required
-                placeholder="1 месяц"
-              />
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="isActive"
-                checked={formData.isActive}
-                onCheckedChange={(checked) =>
-                  setFormData({ ...formData, isActive: checked })
-                }
-              />
-              <Label htmlFor="isActive">Активный абонемент</Label>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Описание</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="price">Цена (руб.)</Label>
+            <Input
+              id="price"
+              type="number"
+              value={form.price}
               onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
+                setForm({ ...form, price: Number(e.target.value) })
               }
-              rows={3}
-              placeholder="Описание абонемента..."
+              placeholder="2000"
             />
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="features">Особенности (через запятую)</Label>
-            <Textarea
-              id="features"
-              value={formData.features}
+          <div>
+            <Label htmlFor="duration">Длительность (дни)</Label>
+            <Input
+              id="duration"
+              type="number"
+              value={form.duration}
               onChange={(e) =>
-                setFormData({ ...formData, features: e.target.value })
+                setForm({ ...form, duration: Number(e.target.value) })
               }
-              rows={2}
-              placeholder="Безлимитные занятия, Персональный тренер, Сауна"
+              placeholder="30"
             />
           </div>
+        </div>
 
-          <div className="flex gap-2">
-            <Button type="submit">
-              <Icon
-                name={editingSub ? "Save" : "Plus"}
-                size={16}
-                className="mr-2"
-              />
-              {editingSub ? "Сохранить" : "Добавить"}
+        <div>
+          <Label htmlFor="features">Особенности (каждая с новой строки)</Label>
+          <Textarea
+            id="features"
+            value={form.features}
+            onChange={(e) => setForm({ ...form, features: e.target.value })}
+            placeholder="Безлимитное посещение&#10;Групповые тренировки&#10;Консультации тренера"
+            rows={4}
+          />
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="active"
+            checked={form.isActive}
+            onCheckedChange={(checked) =>
+              setForm({ ...form, isActive: checked })
+            }
+          />
+          <Label htmlFor="active">Активный абонемент</Label>
+        </div>
+
+        <div className="flex gap-2">
+          <Button onClick={handleSubmit}>
+            {editingSub ? "Обновить" : "Добавить"}
+          </Button>
+          {editingSub && (
+            <Button variant="outline" onClick={onCancelEdit}>
+              Отменить
             </Button>
-            {editingSub && (
-              <Button type="button" variant="outline" onClick={onCancelEdit}>
-                <Icon name="X" size={16} className="mr-2" />
-                Отмена
-              </Button>
-            )}
-          </div>
-        </form>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

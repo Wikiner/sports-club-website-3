@@ -6,7 +6,6 @@ import {
   ReactNode,
 } from "react";
 import { toast } from "sonner";
-import { apiService } from "../services/api";
 
 export interface User {
   id: string;
@@ -16,8 +15,8 @@ export interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (username: string, password: string) => Promise<boolean>;
-  logout: () => Promise<void>;
+  login: (username: string, password: string) => boolean;
+  logout: () => void;
   isAdmin: boolean;
 }
 
@@ -56,51 +55,27 @@ export const useAuthHook = () => {
     },
   ];
 
-  const login = async (
-    username: string,
-    password: string,
-  ): Promise<boolean> => {
-    try {
-      const result = await apiService.login(username, password);
-      setUser(result.user);
-      localStorage.setItem("authToken", result.token);
-      localStorage.setItem("currentUser", JSON.stringify(result.user));
-      toast.success(`Добро пожаловать, ${result.user.username}!`);
-      return true;
-    } catch (error) {
-      console.error("Login failed:", error);
-      // Fallback to demo users
-      const foundUser = demoUsers.find(
-        (u) => u.username === username && u.password === password,
-      );
+  const login = (username: string, password: string): boolean => {
+    const foundUser = demoUsers.find(
+      (u) => u.username === username && u.password === password,
+    );
 
-      if (foundUser) {
-        const { password: _, ...userWithoutPassword } = foundUser;
-        setUser(userWithoutPassword);
-        localStorage.setItem(
-          "currentUser",
-          JSON.stringify(userWithoutPassword),
-        );
-        toast.success(`Добро пожаловать, ${foundUser.username}!`);
-        return true;
-      } else {
-        toast.error("Неверный логин или пароль");
-        return false;
-      }
+    if (foundUser) {
+      const { password: _, ...userWithoutPassword } = foundUser;
+      setUser(userWithoutPassword);
+      localStorage.setItem("currentUser", JSON.stringify(userWithoutPassword));
+      toast.success(`Добро пожаловать, ${foundUser.username}!`);
+      return true;
+    } else {
+      toast.error("Неверный логин или пароль");
+      return false;
     }
   };
 
-  const logout = async () => {
-    try {
-      await apiService.logout();
-    } catch (error) {
-      console.error("Logout failed:", error);
-    } finally {
-      setUser(null);
-      localStorage.removeItem("currentUser");
-      localStorage.removeItem("authToken");
-      toast.success("Вы вышли из системы");
-    }
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem("currentUser");
+    toast.success("Вы вышли из системы");
   };
 
   const isAdmin = user?.role === "admin";

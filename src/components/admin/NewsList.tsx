@@ -74,16 +74,14 @@ const NewsList = ({ news, onEdit, onDelete }: NewsListProps) => {
                       variant="outline"
                       onClick={() => onEdit(item)}
                     >
-                      <Icon name="Edit" size={16} className="mr-1" />
-                      Редактировать
+                      <Icon name="Edit" size={16} />
                     </Button>
                     <Button
                       size="sm"
                       variant="destructive"
                       onClick={() => onDelete(item.id)}
                     >
-                      <Icon name="Trash2" size={16} className="mr-1" />
-                      Удалить
+                      <Icon name="Trash2" size={16} />
                     </Button>
                   </div>
                 </div>

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { apiService } from "@/services/api";
 
 export interface ScheduleItem {
   id: string;
@@ -14,86 +13,76 @@ export interface ScheduleItem {
 
 export const useSchedule = () => {
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadSchedule();
   }, []);
 
-  const loadSchedule = async () => {
-    try {
-      setLoading(true);
-      const data = await apiService.getSchedule();
-      setSchedule(data);
-    } catch (error) {
-      console.error("Failed to load schedule:", error);
-      // Fallback to localStorage
-      const savedSchedule = localStorage.getItem("schedule");
-      if (savedSchedule) {
-        setSchedule(JSON.parse(savedSchedule));
-      } else {
-        const defaultSchedule: ScheduleItem[] = [
-          {
-            id: "1",
-            time: "07:00",
-            title: "Утренняя йога",
-            trainer: "Анна Петрова",
-            duration: "60 мин",
-            difficulty: "Легко",
-            spots: 8,
-          },
-          {
-            id: "2",
-            time: "09:00",
-            title: "Силовая тренировка",
-            trainer: "Михаил Сидоров",
-            duration: "90 мин",
-            difficulty: "Сложно",
-            spots: 5,
-          },
-        ];
-        setSchedule(defaultSchedule);
-      }
-      toast.error("Не удалось загрузить расписание с сервера");
-    } finally {
-      setLoading(false);
+  const loadSchedule = () => {
+    const savedSchedule = localStorage.getItem("schedule");
+    if (savedSchedule) {
+      setSchedule(JSON.parse(savedSchedule));
+    } else {
+      const defaultSchedule: ScheduleItem[] = [
+        {
+          id: "1",
+          time: "07:00",
+          title: "Утренняя йога",
+          trainer: "Анна Петрова",
+          duration: "60 мин",
+          difficulty: "Легко",
+          spots: 8,
+        },
+        {
+          id: "2",
+          time: "09:00",
+          title: "Силовая тренировка",
+          trainer: "Михаил Сидоров",
+          duration: "90 мин",
+          difficulty: "Сложно",
+          spots: 5,
+        },
+        {
+          id: "3",
+          time: "11:00",
+          title: "Аэробика",
+          trainer: "Елена Козлова",
+          duration: "45 мин",
+          difficulty: "Средне",
+          spots: 12,
+        },
+      ];
+      setSchedule(defaultSchedule);
+      localStorage.setItem("schedule", JSON.stringify(defaultSchedule));
     }
   };
 
-  const addScheduleItem = async (item: Omit<ScheduleItem, "id">) => {
-    try {
-      const newItem = await apiService.createScheduleItem(item);
-      setSchedule((prev) => [...prev, newItem]);
-      toast.success("Занятие добавлено в расписание!");
-    } catch (error) {
-      console.error("Failed to add schedule item:", error);
-      toast.error("Ошибка при добавлении занятия");
-    }
+  const addScheduleItem = (item: Omit<ScheduleItem, "id">) => {
+    const newItem: ScheduleItem = {
+      id: Date.now().toString(),
+      ...item,
+    };
+
+    const updatedSchedule = [...schedule, newItem];
+    setSchedule(updatedSchedule);
+    localStorage.setItem("schedule", JSON.stringify(updatedSchedule));
+    toast.success("Занятие добавлено в расписание!");
   };
 
-  const updateScheduleItem = async (
-    id: string,
-    item: Partial<ScheduleItem>,
-  ) => {
-    try {
-      const updatedItem = await apiService.updateScheduleItem(id, item);
-      setSchedule((prev) => prev.map((s) => (s.id === id ? updatedItem : s)));
-      toast.success("Занятие обновлено успешно!");
-    } catch (error) {
-      console.error("Failed to update schedule item:", error);
-      toast.error("Ошибка при обновлении занятия");
-    }
+  const updateScheduleItem = (id: string, item: Omit<ScheduleItem, "id">) => {
+    const updatedSchedule = schedule.map((s) =>
+      s.id === id ? { ...item, id } : s,
+    );
+    setSchedule(updatedSchedule);
+    localStorage.setItem("schedule", JSON.stringify(updatedSchedule));
+    toast.success("Занятие обновлено успешно!");
   };
 
-  const deleteScheduleItem = async (id: string) => {
-    try {
-      await apiService.deleteScheduleItem(id);
-      setSchedule((prev) => prev.filter((s) => s.id !== id));
-      toast.success("Занятие удалено из расписания");
-    } catch (error) {
-      console.error("Failed to delete schedule item:", error);
-      toast.error("Ошибка при удалении занятия");
-    }
+  const deleteScheduleItem = (id: string) => {
+    const updatedSchedule = schedule.filter((s) => s.id !== id);
+    setSchedule(updatedSchedule);
+    localStorage.setItem("schedule", JSON.stringify(updatedSchedule));
+    toast.success("Занятие удалено из расписания");
   };
 
   return {
@@ -101,6 +90,5 @@ export const useSchedule = () => {
     addScheduleItem,
     updateScheduleItem,
     deleteScheduleItem,
-    loading,
   };
 };
