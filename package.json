@@ -9,7 +9,8 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "serve": "vite build --base=./ && echo 'Build completed! Open dist/index.html in your browser'"
+    "serve": "vite build --base=./ && echo 'Build completed! Open dist/index.html in your browser'",
+    "build:static": "cross-env STATIC_BUILD=true vite build --base=./ && echo 'Static build completed! You can now open dist/index.html directly in your browser'"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -44,6 +45,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
+    "cross-env": "^7.0.3",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.3.0",
     "input-otp": "^1.2.4",

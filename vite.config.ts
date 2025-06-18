@@ -8,13 +8,16 @@ export default defineConfig(({ mode }) => ({
   plugins: [react(), mode === "development" && componentTagger()].filter(
     Boolean,
   ),
-  base: mode === "production" ? "./" : "/",
+  base: mode === "production" || process.env.STATIC_BUILD ? "./" : "/",
   build: {
     outDir: "dist",
     assetsDir: "assets",
     rollupOptions: {
       output: {
         manualChunks: undefined,
+        assetFileNames: "assets/[name]-[hash][extname]",
+        chunkFileNames: "assets/[name]-[hash].js",
+        entryFileNames: "assets/[name]-[hash].js",
       },
     },
   },
